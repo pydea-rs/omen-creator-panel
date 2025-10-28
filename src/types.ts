@@ -1,11 +1,11 @@
 export interface Category {
-  id: string;
+  id: number;
   name: string;
   subCategories?: Category[];
 }
 
 export interface Oracle {
-  id: string;
+  id: number;
   name: string;
   address: string;
 }
@@ -13,13 +13,13 @@ export interface Oracle {
 export interface MarketFormData {
   title: string;
   description: string;
-  category?: string;
+  category?: number;
   endDate: string;
   outcomes: string[];
   image?: File;
   reference?: string;
   initialLiquidity?: number;
-  oracle?: string;
+  oracle?: number;
   fee?: number;
   startAt?: string;
 }

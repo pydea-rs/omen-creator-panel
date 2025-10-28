@@ -4,15 +4,15 @@ import type { Category } from '../types';
 
 interface CategorySelectorProps {
   categories: Category[];
-  value: string;
-  onChange: (categoryId: string, categoryName: string) => void;
+  value: number;
+  onChange: (categoryId: number, categoryName: string) => void;
   disabled: boolean;
 }
 
 interface CategoryMenuProps {
   categories: Category[];
   onSelect: (category: Category) => void;
-  selectedId: string;
+  selectedId: number;
   level: number;
 }
 
@@ -20,14 +20,24 @@ function CategoryMenu({ categories, onSelect, selectedId, level }: CategoryMenuP
   const [hoveredCategory, setHoveredCategory] = useState<Category | null>(null);
   const [submenuPosition, setSubmenuPosition] = useState<{ top: number; left: number } | null>(null);
   const itemRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handleMouseEnter = (category: Category, id: string) => {
+  const handleMouseEnter = (category: Category, id: number) => {
+    // Clear any existing timeout
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+      hoverTimeoutRef.current = null;
+    }
+
     if (category.subCategories && category.subCategories.length > 0) {
       setHoveredCategory(category);
       const element = itemRefs.current[id];
       if (element) {
         const rect = element.getBoundingClientRect();
-        setSubmenuPosition({ top: rect.top, left: rect.right });
+        setSubmenuPosition({
+          top: rect.top - 8, // Slight offset to align better
+          left: rect.right + 4 // Small gap between menus
+        });
       }
     } else {
       setHoveredCategory(null);
@@ -35,10 +45,33 @@ function CategoryMenu({ categories, onSelect, selectedId, level }: CategoryMenuP
     }
   };
 
+  const handleMouseLeave = () => {
+    // Add a small delay before hiding the submenu
+    hoverTimeoutRef.current = setTimeout(() => {
+      setHoveredCategory(null);
+      setSubmenuPosition(null);
+    }, 150);
+  };
+
+  const handleSubmenuMouseEnter = () => {
+    // Clear timeout when entering submenu
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+      hoverTimeoutRef.current = null;
+    }
+  };
+
+  const handleSubmenuMouseLeave = () => {
+    setHoveredCategory(null);
+    setSubmenuPosition(null);
+  };
+
   return (
     <>
-      <div className={`bg-white rounded-lg shadow-lg border-2 border-slate-200 py-2 min-w-64 max-h-96 overflow-y-auto ${level === 0 ? 'relative' : 'fixed'}`}
-        style={level > 0 && submenuPosition ? { top: submenuPosition.top, left: submenuPosition.left } : undefined}>
+      <div
+        className={`bg-white rounded-lg shadow-lg border-2 border-slate-200 py-2 min-w-64 max-h-96 overflow-y-auto ${level === 0 ? 'relative' : ''}`}
+        onMouseLeave={handleMouseLeave}
+      >
         {categories.map((category) => (
           <button
             key={category.id}
@@ -60,16 +93,23 @@ function CategoryMenu({ categories, onSelect, selectedId, level }: CategoryMenuP
             {category.subCategories && category.subCategories.length > 0 && (
               <ChevronRight className="w-4 h-4 text-slate-400" />
             )}
+            {/* Debug: Show subcategory count */}
+            {category.subCategories && category.subCategories.length > 0 && (
+              <span className="text-xs text-red-500 ml-1">({category.subCategories.length})</span>
+            )}
           </button>
         ))}
       </div>
       {hoveredCategory && hoveredCategory.subCategories && hoveredCategory.subCategories.length > 0 && submenuPosition && (
         <div
-          onMouseEnter={() => setHoveredCategory(hoveredCategory)}
-          onMouseLeave={() => {
-            setHoveredCategory(null);
-            setSubmenuPosition(null);
+          className="fixed z-[60]"
+          style={{
+            top: submenuPosition.top,
+            left: submenuPosition.left,
+            pointerEvents: 'auto'
           }}
+          onMouseEnter={handleSubmenuMouseEnter}
+          onMouseLeave={handleSubmenuMouseLeave}
         >
           <CategoryMenu
             categories={hoveredCategory.subCategories}
@@ -89,7 +129,7 @@ function CategorySelector({ categories, value, onChange, disabled }: CategorySel
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const findCategoryName = (cats: Category[], id: string): string => {
+    const findCategoryName = (cats: Category[], id: number): string => {
       for (const cat of cats) {
         if (cat.id === id) return cat.name;
         if (cat.subCategories) {

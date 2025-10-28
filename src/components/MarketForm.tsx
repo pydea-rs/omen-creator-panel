@@ -14,12 +14,12 @@ function MarketForm({ onSubmit, disabled, categories, oracles }: MarketFormProps
   const [formData, setFormData] = useState<MarketFormData>({
     title: '',
     description: '',
-    category: '',
+    category: 3,
     endDate: '',
     outcomes: ['', ''],
     reference: '',
     initialLiquidity: undefined,
-    oracle: '',
+    oracle: 0,
     fee: undefined,
     startAt: undefined,
   });
@@ -95,7 +95,7 @@ function MarketForm({ onSubmit, disabled, categories, oracles }: MarketFormProps
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
         <label className="block text-sm font-semibold text-slate-700 mb-2">
-          Market Title <span className="text-red-500">*</span>
+          Question <span className="text-red-500">*</span>
         </label>
         <input
           type="text"
@@ -130,7 +130,7 @@ function MarketForm({ onSubmit, disabled, categories, oracles }: MarketFormProps
           </label>
           <CategorySelector
             categories={categories}
-            value={formData.category || ''}
+            value={formData.category || 3}
             onChange={(slug) => setFormData({ ...formData, category: slug })}
             disabled={disabled}
           />
@@ -139,7 +139,7 @@ function MarketForm({ onSubmit, disabled, categories, oracles }: MarketFormProps
         <div>
           <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-2">
             <Calendar className="w-4 h-4" />
-            End Date <span className="text-red-500">*</span>
+            Deadline <span className="text-red-500">*</span>
           </label>
           <input
             type="datetime-local"
@@ -210,13 +210,13 @@ function MarketForm({ onSubmit, disabled, categories, oracles }: MarketFormProps
           </label>
           <select
             value={formData.oracle}
-            onChange={(e) => setFormData({ ...formData, oracle: e.target.value })}
+            onChange={(e) => setFormData({ ...formData, oracle: +e.target.value })}
             className="w-full px-4 py-3 rounded-lg border-2 border-slate-200 focus:border-blue-500 focus:outline-none transition-colors bg-white"
             disabled={disabled}
           >
             <option value="">Select an oracle...</option>
             {oracles?.map((oracle) => (
-              <option key={oracle.id} value={oracle.id}>
+              <option key={oracle.id} defaultChecked={oracle?.id === 0} value={oracle.id}>
                 {oracle.name}
               </option>
             ))}
