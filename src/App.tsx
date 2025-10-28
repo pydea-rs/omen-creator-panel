@@ -3,6 +3,7 @@ import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import ApiSelector from './components/ApiSelector';
 import MarketForm from './components/MarketForm';
 import LoadingOverlay from './components/LoadingOverlay';
+import Header from './components/Header';
 import { uploadImage, createMarket, fetchCategories, fetchOracles } from './services/api';
 import type { MarketFormData, LoadingState, Category, Oracle } from './types';
 
@@ -13,6 +14,7 @@ function App() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [oracles, setOracles] = useState<Oracle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -38,27 +40,24 @@ function App() {
     setResult(null);
 
     try {
-      // Step 1: Upload image if provided
       let imageFilename: string | null = '';
       if (formData.image) {
         setLoadingState({ step: 'uploading', message: 'Uploading the image...' });
         imageFilename = await uploadImage(baseUrl, formData.image);
-        if(!imageFilename?.length) {
+        if (!imageFilename?.length) {
           throw new Error('Image upload failed! Please try again.');
         }
       }
 
-      // Step 2: Create market
       setLoadingState({ step: 'creating', message: 'Creating the market...' });
-      const marketData = {
+      const { category, oracle, ...marketData } = {
         ...formData,
         image: imageFilename || undefined,
       };
-      delete marketData.image; // Remove file object, use filename instead
+      delete marketData.image;
 
-      await createMarket(baseUrl, { ...marketData, image: imageFilename || undefined });
+      await createMarket(baseUrl, { ...marketData, image: imageFilename || undefined, categoryId: category, oracleId: oracle });
 
-      // Success
       setLoadingState({ step: 'success', message: 'Market created successfully!' });
       setResult({ success: true, message: 'Your prediction market has been created successfully!' });
 
@@ -78,9 +77,11 @@ function App() {
     }
   };
 
-  return  (
+  return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100">
       {loadingState && <LoadingOverlay state={loadingState} />}
+
+      <Header onLoginClick={() => setShowLoginModal(true)} />
 
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="text-center mb-8">
@@ -107,25 +108,25 @@ function App() {
               disabled={loadingState !== null}
               categories={categories}
               oracles={oracles}
+              showLoginModal={showLoginModal}
+              setShowLoginModal={setShowLoginModal}
             />
           )}
         </div>
 
         {result && (
-          <div className={`mt-6 p-6 rounded-xl ${
-            result.success
-              ? 'bg-green-50 border-2 border-green-200'
-              : 'bg-red-50 border-2 border-red-200'
-          } animate-fadeIn`}>
+          <div className={`mt-6 p-6 rounded-xl ${result.success
+            ? 'bg-green-50 border-2 border-green-200'
+            : 'bg-red-50 border-2 border-red-200'
+            } animate-fadeIn`}>
             <div className="flex items-center gap-3">
               {result.success ? (
                 <CheckCircle2 className="text-green-600 w-6 h-6" />
               ) : (
                 <AlertCircle className="text-red-600 w-6 h-6" />
               )}
-              <p className={`font-medium ${
-                result.success ? 'text-green-800' : 'text-red-800'
-              }`}>
+              <p className={`font-medium ${result.success ? 'text-green-800' : 'text-red-800'
+                }`}>
                 {result.message}
               </p>
             </div>

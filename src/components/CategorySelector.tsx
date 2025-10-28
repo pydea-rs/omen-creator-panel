@@ -93,10 +93,6 @@ function CategoryMenu({ categories, onSelect, selectedId, level }: CategoryMenuP
             {category.subCategories && category.subCategories.length > 0 && (
               <ChevronRight className="w-4 h-4 text-slate-400" />
             )}
-            {/* Debug: Show subcategory count */}
-            {category.subCategories && category.subCategories.length > 0 && (
-              <span className="text-xs text-red-500 ml-1">({category.subCategories.length})</span>
-            )}
           </button>
         ))}
       </div>

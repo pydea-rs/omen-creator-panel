@@ -4,13 +4,13 @@ import type { Category, Oracle } from "../types";
 interface CreateMarketPayload {
   title: string;
   description: string;
-  category?: string;
+  categoryId?: number;
   endDate: string;
   outcomes: string[];
   image?: string;
   reference?: string;
   initialLiquidity?: number;
-  oracle?: string;
+  oracleId?: number;
   fee?: number;
   startAt?: string;
 }
