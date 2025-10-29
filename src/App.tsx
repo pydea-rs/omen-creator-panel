@@ -10,6 +10,7 @@ import LoginModal from './components/LoginModal';
 import { useAuth } from './hooks/useAuth';
 
 function App() {
+  const { login, loading: loginLoading, isAuthenticated, logout } = useAuth();
   const [baseUrl, setBaseUrl] = useState('https://staging.omenium.app/api');
   const [loadingState, setLoadingState] = useState<LoadingState | null>(null);
   const [result, setResult] = useState<{ success: boolean; message: string } | null>(null);
@@ -17,14 +18,8 @@ function App() {
   const [oracles, setOracles] = useState<Oracle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const { isAuthenticated, login, loading: loginLoading } = useAuth();
 
-  // Auto-show login modal when not authenticated after loading
-  useEffect(() => {
-    if (!loginLoading && !isAuthenticated) {
-      setShowLoginModal(true);
-    }
-  }, [loginLoading, isAuthenticated]);
+  // Don't auto-show login modal - let user trigger it manually
 
   useEffect(() => {
     const loadData = async () => {
@@ -36,6 +31,7 @@ function App() {
         ]);
         setCategories(categoriesData);
         setOracles(oraclesData);
+        setShowLoginModal(!isAuthenticated)
       } catch (error) {
         console.error('Failed to load data:', error);
       } finally {
@@ -44,7 +40,7 @@ function App() {
     };
 
     loadData();
-  }, [baseUrl]);
+  }, [baseUrl, isAuthenticated]);
 
   const handleSubmit = async (formData: MarketFormData) => {
     setResult(null);
@@ -91,7 +87,7 @@ function App() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100">
       {loadingState && <LoadingOverlay state={loadingState} />}
 
-      <Header onLoginClick={() => setShowLoginModal(true)} />
+      <Header onLoginClick={() => setShowLoginModal(true)} isAuthenticated={isAuthenticated} isLoading={loginLoading} onLogout={logout} />
 
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="text-center mb-8">
@@ -116,7 +112,7 @@ function App() {
             <>
               <MarketForm
                 onSubmit={handleSubmit}
-                disabled={loadingState !== null}
+                disabled={Boolean(loadingState) || loginLoading || !isAuthenticated}
                 categories={categories}
                 oracles={oracles}
                 showLoginModal={showLoginModal}

@@ -2,7 +2,6 @@ import { useState, useEffect, FormEvent } from 'react';
 import { Plus, X, Image, Calendar, DollarSign, Link, Percent, Shield, Clock } from 'lucide-react';
 import type { MarketFormData, Category, Oracle } from '../types';
 import CategorySelector from './CategorySelector';
-import { useAuth } from '../hooks/useAuth';
 
 interface MarketFormProps {
   onSubmit: (data: MarketFormData) => void;
@@ -15,7 +14,6 @@ interface MarketFormProps {
 }
 
 function MarketForm({ onSubmit, disabled, categories, oracles, setShowLoginModal }: MarketFormProps) {
-  const authState = useAuth();
 
   const [formData, setFormData] = useState<MarketFormData>({
     title: '',
@@ -46,7 +44,7 @@ function MarketForm({ onSubmit, disabled, categories, oracles, setShowLoginModal
   }, []);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!authState.isAuthenticated) {
+    if (disabled) {
       setShowLoginModal(true);
       return;
     }
@@ -82,7 +80,7 @@ function MarketForm({ onSubmit, disabled, categories, oracles, setShowLoginModal
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
 
-    if (!authState.isAuthenticated) {
+    if (disabled) {
       setShowLoginModal(true);
       return;
     }
@@ -323,31 +321,38 @@ function MarketForm({ onSubmit, disabled, categories, oracles, setShowLoginModal
               </button>
             </div>
           )}
-          <label className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 border-dashed border-slate-300 transition-colors ${!authState.isAuthenticated || disabled
+          <label className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 border-dashed border-slate-300 transition-colors ${disabled
             ? 'opacity-50 cursor-not-allowed'
             : 'hover:border-blue-500 hover:bg-blue-50 cursor-pointer'
             }`}>
             <Image className="w-5 h-5 text-slate-600" />
             <span className="text-sm font-medium text-slate-700">
-              {!authState.isAuthenticated ? 'Login to Upload Image' : (imagePreview ? 'Change Image' : 'Upload Image')}
+              {disabled ? 'Login to Upload Image' : (imagePreview ? 'Change Image' : 'Upload Image')}
             </span>
             <input
               type="file"
               accept="image/*"
               onChange={handleImageChange}
               className="hidden"
-              disabled={disabled || !authState.isAuthenticated}
+              disabled={disabled}
             />
           </label>
         </div>
       </div>
 
+      {/* Authentication status indicator */}
+      {disabled && (
+        <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">
+          <p>You need to log in to create markets. Click "Login to Create Market" below or try uploading an image to open the login modal.</p>
+        </div>
+      )}
+
       <button
         type="submit"
-        disabled={disabled || !authState.isAuthenticated}
+        disabled={disabled}
         className="w-full py-4 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold text-lg shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-blue-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-lg"
       >
-        {authState.loading ? 'Loading...' : (!authState.isAuthenticated ? 'Login to Create Market' : 'Create Market')}
+        {disabled ? 'Login to Create Market' : 'Create Market'}
       </button>
     </form>
   );
