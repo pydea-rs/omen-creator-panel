@@ -10,8 +10,8 @@ import LoginModal from './components/LoginModal';
 import { useAuth } from './hooks/useAuth';
 
 function App() {
-  const { login, loading: loginLoading, isAuthenticated, logout } = useAuth();
   const [baseUrl, setBaseUrl] = useState('https://staging.omenium.app/api');
+  const { login, loading: loginLoading, isAuthenticated, logout } = useAuth(baseUrl);
   const [loadingState, setLoadingState] = useState<LoadingState | null>(null);
   const [result, setResult] = useState<{ success: boolean; message: string } | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);

@@ -7,7 +7,7 @@ interface AuthState {
   loading: boolean;
 }
 
-export function useAuth() {
+export function useAuth(baseURL: string) {
   const [authState, setAuthState] = useState<AuthState>({
     isAuthenticated: false,
     token: null,
@@ -16,13 +16,13 @@ export function useAuth() {
 
   useEffect(() => {
     // Check for existing token in localStorage
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem(baseURL);
     setAuthState({
       isAuthenticated: !!token,
       token,
       loading: false,
     });
-  }, []);
+  }, [baseURL]);
 
   const login = async (baseURL: string, username: string, password: string) => {
     const token = await doLogin(baseURL, { username, password })
@@ -31,7 +31,7 @@ export function useAuth() {
       throw new Error('Login failed!');
     }
 
-    localStorage.setItem('authToken', token);
+    localStorage.setItem(baseURL, token);
     setAuthState({
       isAuthenticated: true,
       token,
@@ -40,7 +40,7 @@ export function useAuth() {
   };
 
   const logout = () => {
-    localStorage.removeItem('authToken');
+    localStorage.removeItem(baseURL);
     setAuthState({
       isAuthenticated: false,
       token: null,

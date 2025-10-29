@@ -6,8 +6,8 @@ interface ApiSelectorProps {
 }
 
 const API_OPTIONS = [
-  { value: 'https://staging.omenium.app/api', label: 'Omenium App (Staging)' },
-  { value: 'https://staging.omenium.com/api', label: 'Omenium Com (Staging)' },
+  { value: 'https://staging.omenium.app/api', label: 'New Arena - Staging' },
+  { value: 'https://staging.omenium.com/api', label: 'Old Arena - Dev' },
 ];
 
 function ApiSelector({ baseUrl, onChange }: ApiSelectorProps) {
