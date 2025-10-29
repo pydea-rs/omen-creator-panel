@@ -250,7 +250,7 @@ function MarketForm({ onSubmit, disabled, categories, oracles, setShowLoginModal
             value={formData.fee || ''}
             onChange={(e) => setFormData({ ...formData, fee: e.target.value ? parseFloat(e.target.value) : undefined })}
             className="w-full px-4 py-3 rounded-lg border-2 border-slate-200 focus:border-blue-500 focus:outline-none transition-colors"
-            placeholder="0-100"
+            placeholder="0-100 {Empty for no fee)"
             disabled={disabled}
           />
         </div>

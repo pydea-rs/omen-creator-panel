@@ -1,12 +1,17 @@
 import axios from "axios";
 import type { Category, Oracle } from "../types";
 
+interface MarketOutcome {
+  title: string;
+  icon?: string;
+  description?: string;
+}
 interface CreateMarketPayload {
   title: string;
   description: string;
   categoryId?: number;
   endDate: string;
-  outcomes: string[];
+  outcomes: MarketOutcome[];
   image?: string;
   reference?: string;
   initialLiquidity?: number;
@@ -15,7 +20,6 @@ interface CreateMarketPayload {
   startAt?: string;
 }
 
-
 interface DoLoginPayload {
   username: string;
   password: string;
@@ -23,6 +27,7 @@ interface DoLoginPayload {
 
 const handleAxiosError = (error: unknown, defaultMessage: string): never => {
   if (axios.isAxiosError(error)) {
+    console.log(error.response)
     const message =
       error.response?.data?.message || error.message || defaultMessage;
     throw new Error(message);
@@ -32,18 +37,20 @@ const handleAxiosError = (error: unknown, defaultMessage: string): never => {
 
 export async function uploadImage(
   baseUrl: string,
-  file: File
+  file: File,
+  accessToken: string
 ): Promise<string | null> {
   try {
     const formData = new FormData();
     formData.append("file", file);
 
     const { data: res } = await axios.post(
-      `${baseUrl}/file-upload/prediction-market-image`,
+      `${baseUrl}/file-upload/prediction-market`,
       formData,
       {
         headers: {
           "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${accessToken}`,
         },
       }
     );
@@ -85,12 +92,14 @@ export async function fetchOracles(baseUrl: string): Promise<Oracle[]> {
 
 export async function createMarket(
   baseUrl: string,
-  payload: CreateMarketPayload
+  payload: CreateMarketPayload,
+  accessToken: string
 ): Promise<void> {
   try {
-    await axios.post(`${baseUrl}/prediction-market/create`, payload, {
+    await axios.post(`${baseUrl}/prediction-market`, payload, {
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
       },
     });
   } catch (error) {
@@ -103,7 +112,7 @@ export async function doLogin(
   payload: DoLoginPayload
 ): Promise<string | null> {
   try {
-    const {data: res} = await axios.post(`${baseUrl}/auth/login`, payload, {
+    const { data: res } = await axios.post(`${baseUrl}/auth/login`, payload, {
       headers: {
         "Content-Type": "application/json",
       },
