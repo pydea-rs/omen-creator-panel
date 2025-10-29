@@ -15,7 +15,7 @@ function ApiSelector({ baseUrl, onChange }: ApiSelectorProps) {
     <div className="space-y-3">
       <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
         <Server className="w-4 h-4" />
-        API Base URL
+        Target Stage
       </label>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {API_OPTIONS.map((option) => (

@@ -192,7 +192,7 @@ function App() {
             Prediction Market Creator
           </h1>
           <p className="text-slate-600">
-            Create and manage prediction markets with ease
+            Select the stage and Create your prediction market
           </p>
         </div>
 
