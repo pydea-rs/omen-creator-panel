@@ -12,7 +12,7 @@ export interface Oracle {
 
 export interface MarketFormData {
   question: string;
-  description: string;
+  description?: string;
   category?: number;
   resolveAt: Date;
   outcomes: string[];

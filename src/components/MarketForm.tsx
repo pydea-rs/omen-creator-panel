@@ -1,10 +1,20 @@
-import { useState, useEffect, FormEvent } from 'react';
-import { Plus, X, Image, Calendar, DollarSign, Link, Percent, Shield, Clock } from 'lucide-react';
-import type { MarketFormData, Category, Oracle } from '../types';
-import CategorySelector from './CategorySelector';
+import { useState, useEffect, FormEvent } from "react";
+import {
+  Plus,
+  X,
+  Image,
+  Calendar,
+  DollarSign,
+  Link,
+  Percent,
+  Shield,
+  Clock,
+} from "lucide-react";
+import type { MarketFormData, Category, Oracle } from "../types";
+import CategorySelector from "./CategorySelector";
 
 interface MarketFormProps {
-  onSubmit: (data: MarketFormData) => void;
+  onSubmit: (data: MarketFormData) => Promise<boolean>;
   disabled: boolean;
   categories: Category[];
   oracles: Oracle[];
@@ -13,15 +23,20 @@ interface MarketFormProps {
   baseURL: string;
 }
 
-function MarketForm({ onSubmit, disabled, categories, oracles, setShowLoginModal }: MarketFormProps) {
-
+function MarketForm({
+  onSubmit,
+  disabled,
+  categories,
+  oracles,
+  setShowLoginModal,
+}: MarketFormProps) {
   const [formData, setFormData] = useState<MarketFormData>({
-    question: '',
-    description: '',
+    question: "",
+    description: "",
     category: 3,
     resolveAt: new Date(),
-    outcomes: ['', ''],
-    reference: '',
+    outcomes: ["", ""],
+    reference: "",
     initialLiquidity: undefined,
     oracle: 0,
     fee: undefined,
@@ -33,14 +48,14 @@ function MarketForm({ onSubmit, disabled, categories, oracles, setShowLoginModal
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'p') {
+      if (e.ctrlKey && e.altKey && e.key.toLowerCase() === "p") {
         e.preventDefault();
         setShowStartAt((prev) => !prev);
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -67,7 +82,7 @@ function MarketForm({ onSubmit, disabled, categories, oracles, setShowLoginModal
   };
 
   const addOutcome = () => {
-    setFormData({ ...formData, outcomes: [...formData.outcomes, ''] });
+    setFormData({ ...formData, outcomes: [...formData.outcomes, ""] });
   };
 
   const removeOutcome = (index: number) => {
@@ -77,7 +92,7 @@ function MarketForm({ onSubmit, disabled, categories, oracles, setShowLoginModal
     }
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
     if (disabled) {
@@ -85,22 +100,40 @@ function MarketForm({ onSubmit, disabled, categories, oracles, setShowLoginModal
       return;
     }
 
-    const validOutcomes = formData.outcomes.filter(o => o.trim());
+    const validOutcomes = formData.outcomes.filter((o) => o.trim());
     if (validOutcomes.length < 2) {
-      alert('Please provide at least 2 outcomes');
+      alert("Please provide at least 2 outcomes");
       return;
     }
 
-    if (formData.fee !== undefined && (formData.fee < 0 || formData.fee > 100)) {
-      alert('Fee must be between 0 and 100');
+    if (
+      formData.fee !== undefined &&
+      (formData.fee < 0 || formData.fee > 100)
+    ) {
+      alert("Fee must be between 0 and 100");
       return;
     }
 
-    onSubmit({
-      ...formData,
-      outcomes: validOutcomes,
-      startAt: showStartAt ? formData.startAt : undefined,
-    });
+    if (
+      await onSubmit({
+        ...formData,
+        outcomes: validOutcomes,
+        startAt: showStartAt ? formData.startAt : undefined,
+      })
+    ) {
+      setFormData({
+        question: "",
+        description: "",
+        category: 3,
+        resolveAt: new Date(),
+        outcomes: ["", ""],
+        reference: "",
+        initialLiquidity: undefined,
+        oracle: 0,
+        fee: undefined,
+        startAt: undefined,
+      });
+    }
 
     setShowStartAt(false);
   };
@@ -115,7 +148,9 @@ function MarketForm({ onSubmit, disabled, categories, oracles, setShowLoginModal
           type="text"
           required
           value={formData.question}
-          onChange={(e) => setFormData({ ...formData, question: e.target.value })}
+          onChange={(e) =>
+            setFormData({ ...formData, question: e.target.value })
+          }
           className="w-full px-4 py-3 rounded-lg border-2 border-slate-200 focus:border-blue-500 focus:outline-none transition-colors"
           placeholder="Will Bitcoin reach $100k by end of 2025?"
           disabled={disabled}
@@ -124,12 +159,13 @@ function MarketForm({ onSubmit, disabled, categories, oracles, setShowLoginModal
 
       <div>
         <label className="block text-sm font-semibold text-slate-700 mb-2">
-          Description <span className="text-red-500">*</span>
+          Description
         </label>
         <textarea
-          required
           value={formData.description}
-          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+          onChange={(e) =>
+            setFormData({ ...formData, description: e.target.value })
+          }
           className="w-full px-4 py-3 rounded-lg border-2 border-slate-200 focus:border-blue-500 focus:outline-none transition-colors min-h-32 resize-y"
           placeholder="Detailed description of the prediction market..."
           disabled={disabled}
@@ -159,7 +195,9 @@ function MarketForm({ onSubmit, disabled, categories, oracles, setShowLoginModal
             type="datetime-local"
             required
             value={formData.resolveAt?.toISOString().slice(0, 16)}
-            onChange={(e) => setFormData({ ...formData, resolveAt: new Date(e.target.value) })}
+            onChange={(e) =>
+              setFormData({ ...formData, resolveAt: new Date(e.target.value) })
+            }
             className="w-full px-4 py-3 rounded-lg border-2 border-slate-200 focus:border-blue-500 focus:outline-none transition-colors"
             disabled={disabled}
           />
@@ -175,7 +213,9 @@ function MarketForm({ onSubmit, disabled, categories, oracles, setShowLoginModal
           <input
             type="datetime-local"
             value={formData.startAt?.toISOString().slice(0, 16)}
-            onChange={(e) => setFormData({ ...formData, startAt: new Date(e.target.value) })}
+            onChange={(e) =>
+              setFormData({ ...formData, startAt: new Date(e.target.value) })
+            }
             className="w-full px-4 py-3 rounded-lg border-2 border-slate-200 focus:border-blue-500 focus:outline-none transition-colors"
             disabled={disabled}
           />
@@ -191,7 +231,9 @@ function MarketForm({ onSubmit, disabled, categories, oracles, setShowLoginModal
           <input
             type="text"
             value={formData.reference}
-            onChange={(e) => setFormData({ ...formData, reference: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, reference: e.target.value })
+            }
             className="w-full px-4 py-3 rounded-lg border-2 border-slate-200 focus:border-blue-500 focus:outline-none transition-colors"
             placeholder="Reference URL or identifier"
             disabled={disabled}
@@ -207,8 +249,15 @@ function MarketForm({ onSubmit, disabled, categories, oracles, setShowLoginModal
             type="number"
             min="0"
             step="0.01"
-            value={formData.initialLiquidity || ''}
-            onChange={(e) => setFormData({ ...formData, initialLiquidity: e.target.value ? parseFloat(e.target.value) : undefined })}
+            value={formData.initialLiquidity || ""}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                initialLiquidity: e.target.value
+                  ? parseFloat(e.target.value)
+                  : undefined,
+              })
+            }
             className="w-full px-4 py-3 rounded-lg border-2 border-slate-200 focus:border-blue-500 focus:outline-none transition-colors"
             placeholder="Optional initial liquidity amount"
             disabled={disabled}
@@ -224,13 +273,19 @@ function MarketForm({ onSubmit, disabled, categories, oracles, setShowLoginModal
           </label>
           <select
             value={formData.oracle}
-            onChange={(e) => setFormData({ ...formData, oracle: +e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, oracle: +e.target.value })
+            }
             className="w-full px-4 py-3 rounded-lg border-2 border-slate-200 focus:border-blue-500 focus:outline-none transition-colors bg-white"
             disabled={disabled}
           >
             <option value="">Select an oracle...</option>
             {oracles?.map((oracle) => (
-              <option key={oracle.id} defaultChecked={oracle?.id === 0} value={oracle.id}>
+              <option
+                key={oracle.id}
+                defaultChecked={oracle?.id === 0}
+                value={oracle.id}
+              >
                 {oracle.name}
               </option>
             ))}
@@ -247,8 +302,13 @@ function MarketForm({ onSubmit, disabled, categories, oracles, setShowLoginModal
             min="0"
             max="100"
             step="0.01"
-            value={formData.fee || ''}
-            onChange={(e) => setFormData({ ...formData, fee: e.target.value ? parseFloat(e.target.value) : undefined })}
+            value={formData.fee || ""}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                fee: e.target.value ? parseFloat(e.target.value) : undefined,
+              })
+            }
             className="w-full px-4 py-3 rounded-lg border-2 border-slate-200 focus:border-blue-500 focus:outline-none transition-colors"
             placeholder="0-100 {Empty for no fee)"
             disabled={disabled}
@@ -258,7 +318,8 @@ function MarketForm({ onSubmit, disabled, categories, oracles, setShowLoginModal
 
       <div>
         <label className="block text-sm font-semibold text-slate-700 mb-2">
-          Outcomes <span className="text-red-500">*</span> <span className="text-slate-500 text-xs">(minimum 2)</span>
+          Outcomes <span className="text-red-500">*</span>{" "}
+          <span className="text-slate-500 text-xs">(minimum 2)</span>
         </label>
         <div className="space-y-3">
           {formData.outcomes.map((outcome, index) => (
@@ -321,13 +382,20 @@ function MarketForm({ onSubmit, disabled, categories, oracles, setShowLoginModal
               </button>
             </div>
           )}
-          <label className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 border-dashed border-slate-300 transition-colors ${disabled
-            ? 'opacity-50 cursor-not-allowed'
-            : 'hover:border-blue-500 hover:bg-blue-50 cursor-pointer'
-            }`}>
+          <label
+            className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 border-dashed border-slate-300 transition-colors ${
+              disabled
+                ? "opacity-50 cursor-not-allowed"
+                : "hover:border-blue-500 hover:bg-blue-50 cursor-pointer"
+            }`}
+          >
             <Image className="w-5 h-5 text-slate-600" />
             <span className="text-sm font-medium text-slate-700">
-              {disabled ? 'Login to Upload Image' : (imagePreview ? 'Change Image' : 'Upload Image')}
+              {disabled
+                ? "Login to Upload Image"
+                : imagePreview
+                ? "Change Image"
+                : "Upload Image"}
             </span>
             <input
               type="file"
@@ -343,7 +411,10 @@ function MarketForm({ onSubmit, disabled, categories, oracles, setShowLoginModal
       {/* Authentication status indicator */}
       {disabled && (
         <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">
-          <p>You need to log in to create markets. Click "Login to Create Market" below or try uploading an image to open the login modal.</p>
+          <p>
+            You need to log in to create markets. Click "Login to Create Market"
+            below or try uploading an image to open the login modal.
+          </p>
         </div>
       )}
 
@@ -352,7 +423,7 @@ function MarketForm({ onSubmit, disabled, categories, oracles, setShowLoginModal
         disabled={disabled}
         className="w-full py-4 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold text-lg shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-blue-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-lg"
       >
-        {disabled ? 'Login to Create Market' : 'Create Market'}
+        {disabled ? "Login to Create Market" : "Create Market"}
       </button>
     </form>
   );

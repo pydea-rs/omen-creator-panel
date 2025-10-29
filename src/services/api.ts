@@ -8,7 +8,7 @@ interface MarketOutcome {
 }
 interface CreateMarketPayload {
   question: string;
-  description: string;
+  description?: string;
   categoryId?: number;
   resolveAt: Date;
   outcomes: MarketOutcome[];

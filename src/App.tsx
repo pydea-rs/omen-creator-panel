@@ -115,38 +115,10 @@ function App() {
       setTimeout(() => {
         setLoadingState(null);
       }, 2000);
+      return true;
     } catch (error) {
       setLoadingState({ step: "error", message: "Failed to create market" });
-      if (error instanceof AxiosError && error.status === 401) {
-        logout();
-        setResult({
-          success: false,
-          message: [
-            "Your login session seems to be invalid or expired. Please login again...",
-          ],
-        });
-      } else if (
-        error instanceof AxiosError &&
-        error.status === 400 &&
-        error.response?.data?.message?.toLowerCase() === "validation exception"
-      ) {
-        const message = ["Invalid Input! "];
-        const fieldProblems = Object.entries(
-          error.response?.data?.fields || {}
-        );
-        if (fieldProblems.length) {
-          message.push(
-            ...fieldProblems.map(([field, issues]) => {
-              const issue = issues instanceof Array ? issues[0] : issues;
-              return `\n* ${field}: ${Object.values(issue ?? {})?.[0]}`;
-            })
-          );
-        }
-        setResult({
-          success: false,
-          message,
-        });
-      } else {
+      if (!(error instanceof AxiosError)) {
         setResult({
           success: false,
           message: [
@@ -155,12 +127,52 @@ function App() {
               : "An unexpected error occurred",
           ],
         });
+      } else {
+        if (error.status === 401) {
+          logout();
+          setResult({
+            success: false,
+            message: [
+              "Your login session seems to be invalid or expired. Please login again...",
+            ],
+          });
+        } else if (
+          error.status === 400 &&
+          error.response?.data?.message?.toLowerCase() ===
+            "validation exception"
+        ) {
+          const message = ["Invalid Input! "];
+          const fieldProblems = Object.entries(
+            error.response?.data?.fields || {}
+          );
+          if (fieldProblems.length) {
+            message.push(
+              ...fieldProblems.map(([field, issues]) => {
+                const issue = issues instanceof Array ? issues[0] : issues;
+                return `\n* ${field}: ${Object.values(issue ?? {})?.[0]}`;
+              })
+            );
+          }
+          setResult({
+            success: false,
+            message,
+          });
+        } else {
+          setResult({
+            success: false,
+            message: [
+              error.response?.data?.message ||
+                error.message ||
+                "An unexpected error occurred",
+            ],
+          });
+        }
       }
-
       setTimeout(() => {
         setLoadingState(null);
       }, 3000);
     }
+    return false;
   };
 
   return (
