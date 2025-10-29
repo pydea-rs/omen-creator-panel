@@ -6,6 +6,8 @@ import LoadingOverlay from './components/LoadingOverlay';
 import Header from './components/Header';
 import { uploadImage, createMarket, fetchCategories, fetchOracles } from './services/api';
 import type { MarketFormData, LoadingState, Category, Oracle } from './types';
+import LoginModal from './components/LoginModal';
+import { useAuth } from './hooks/useAuth';
 
 function App() {
   const [baseUrl, setBaseUrl] = useState('https://staging.omenium.app/api');
@@ -15,6 +17,14 @@ function App() {
   const [oracles, setOracles] = useState<Oracle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const { isAuthenticated, login, loading: loginLoading } = useAuth();
+
+  // Auto-show login modal when not authenticated after loading
+  useEffect(() => {
+    if (!loginLoading && !isAuthenticated) {
+      setShowLoginModal(true);
+    }
+  }, [loginLoading, isAuthenticated]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -103,14 +113,22 @@ function App() {
               <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
             </div>
           ) : (
-            <MarketForm
-              onSubmit={handleSubmit}
-              disabled={loadingState !== null}
-              categories={categories}
-              oracles={oracles}
-              showLoginModal={showLoginModal}
-              setShowLoginModal={setShowLoginModal}
-            />
+            <>
+              <MarketForm
+                onSubmit={handleSubmit}
+                disabled={loadingState !== null}
+                categories={categories}
+                oracles={oracles}
+                showLoginModal={showLoginModal}
+                setShowLoginModal={setShowLoginModal}
+                baseURL={baseUrl}
+              />
+              <LoginModal
+                isOpen={showLoginModal}
+                onClose={() => setShowLoginModal(false)}
+                onLogin={(username: string, password: string) => login(baseUrl, username, password)}
+              />
+            </>
           )}
         </div>
 

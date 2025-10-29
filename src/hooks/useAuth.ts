@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { doLogin } from '../services/api';
 
 interface AuthState {
   isAuthenticated: boolean;
@@ -23,25 +24,11 @@ export function useAuth() {
     });
   }, []);
 
-  const login = async (username: string, password: string) => {
-    const response = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ username, password }),
-    });
+  const login = async (baseURL: string, username: string, password: string) => {
+    const token = await doLogin(baseURL, { username, password })
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || 'Login failed');
-    }
-
-    const data = await response.json();
-    const token = data.token || data.access_token;
-
-    if (!token) {
-      throw new Error('No token received from server');
+    if (!token?.length) {
+      throw new Error('Login failed!');
     }
 
     localStorage.setItem('authToken', token);

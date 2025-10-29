@@ -6,9 +6,9 @@ interface HeaderProps {
 }
 
 function Header({ onLoginClick }: HeaderProps) {
-  const { isAuthenticated, logout, loading } = useAuth();
+  const authState = useAuth();
 
-  if (loading) {
+  if (authState.loading) {
     return (
       <header className="bg-white border-b border-slate-200 px-6 py-4">
         <div className="flex items-center justify-between">
@@ -25,14 +25,14 @@ function Header({ onLoginClick }: HeaderProps) {
         <h1 className="text-xl font-bold text-slate-800">Prediction Market</h1>
         
         <div className="flex items-center gap-4">
-          {isAuthenticated ? (
+          {authState.isAuthenticated ? (
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2 text-sm text-slate-600">
                 <User className="w-4 h-4" />
                 <span>Logged in</span>
               </div>
               <button
-                onClick={logout}
+                onClick={authState.logout}
                 className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors text-sm font-medium"
               >
                 <LogOut className="w-4 h-4" />

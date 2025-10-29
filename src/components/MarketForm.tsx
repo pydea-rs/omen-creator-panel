@@ -2,7 +2,6 @@ import { useState, useEffect, FormEvent } from 'react';
 import { Plus, X, Image, Calendar, DollarSign, Link, Percent, Shield, Clock } from 'lucide-react';
 import type { MarketFormData, Category, Oracle } from '../types';
 import CategorySelector from './CategorySelector';
-import LoginModal from './LoginModal';
 import { useAuth } from '../hooks/useAuth';
 
 interface MarketFormProps {
@@ -11,18 +10,12 @@ interface MarketFormProps {
   categories: Category[];
   oracles: Oracle[];
   showLoginModal: boolean;
-  setShowLoginModal: (value: boolean) => void
+  setShowLoginModal: (value: boolean) => void;
+  baseURL: string;
 }
 
-function MarketForm({ onSubmit, disabled, categories, oracles, showLoginModal, setShowLoginModal }: MarketFormProps) {
-  const { isAuthenticated, login, loading } = useAuth();
-
-  // Auto-show login modal when not authenticated after loading
-  useEffect(() => {
-    if (!loading && !isAuthenticated) {
-      setShowLoginModal(true);
-    }
-  }, [loading, isAuthenticated]);
+function MarketForm({ onSubmit, disabled, categories, oracles, setShowLoginModal }: MarketFormProps) {
+  const authState = useAuth();
 
   const [formData, setFormData] = useState<MarketFormData>({
     title: '',
@@ -53,7 +46,7 @@ function MarketForm({ onSubmit, disabled, categories, oracles, showLoginModal, s
   }, []);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!isAuthenticated) {
+    if (!authState.isAuthenticated) {
       setShowLoginModal(true);
       return;
     }
@@ -89,7 +82,7 @@ function MarketForm({ onSubmit, disabled, categories, oracles, showLoginModal, s
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
 
-    if (!isAuthenticated) {
+    if (!authState.isAuthenticated) {
       setShowLoginModal(true);
       return;
     }
@@ -330,20 +323,20 @@ function MarketForm({ onSubmit, disabled, categories, oracles, showLoginModal, s
               </button>
             </div>
           )}
-          <label className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 border-dashed border-slate-300 transition-colors ${!isAuthenticated || disabled
+          <label className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 border-dashed border-slate-300 transition-colors ${!authState.isAuthenticated || disabled
             ? 'opacity-50 cursor-not-allowed'
             : 'hover:border-blue-500 hover:bg-blue-50 cursor-pointer'
             }`}>
             <Image className="w-5 h-5 text-slate-600" />
             <span className="text-sm font-medium text-slate-700">
-              {!isAuthenticated ? 'Login to Upload Image' : (imagePreview ? 'Change Image' : 'Upload Image')}
+              {!authState.isAuthenticated ? 'Login to Upload Image' : (imagePreview ? 'Change Image' : 'Upload Image')}
             </span>
             <input
               type="file"
               accept="image/*"
               onChange={handleImageChange}
               className="hidden"
-              disabled={disabled || !isAuthenticated}
+              disabled={disabled || !authState.isAuthenticated}
             />
           </label>
         </div>
@@ -351,17 +344,11 @@ function MarketForm({ onSubmit, disabled, categories, oracles, showLoginModal, s
 
       <button
         type="submit"
-        disabled={disabled || !isAuthenticated}
+        disabled={disabled || !authState.isAuthenticated}
         className="w-full py-4 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold text-lg shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-blue-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-lg"
       >
-        {loading ? 'Loading...' : (!isAuthenticated ? 'Login to Create Market' : 'Create Market')}
+        {authState.loading ? 'Loading...' : (!authState.isAuthenticated ? 'Login to Create Market' : 'Create Market')}
       </button>
-
-      <LoginModal
-        isOpen={showLoginModal}
-        onClose={() => setShowLoginModal(false)}
-        onLogin={login}
-      />
     </form>
   );
 }

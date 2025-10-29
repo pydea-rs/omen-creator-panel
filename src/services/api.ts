@@ -15,6 +15,12 @@ interface CreateMarketPayload {
   startAt?: string;
 }
 
+
+interface DoLoginPayload {
+  username: string;
+  password: string;
+}
+
 const handleAxiosError = (error: unknown, defaultMessage: string): never => {
   if (axios.isAxiosError(error)) {
     const message =
@@ -90,4 +96,21 @@ export async function createMarket(
   } catch (error) {
     handleAxiosError(error, "Failed to create market");
   }
+}
+
+export async function doLogin(
+  baseUrl: string,
+  payload: DoLoginPayload
+): Promise<string | null> {
+  try {
+    const {data: res} = await axios.post(`${baseUrl}/auth/login`, payload, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return res.data?.accessToken;
+  } catch (error) {
+    handleAxiosError(error, "Login failed!");
+  }
+  return null;
 }
