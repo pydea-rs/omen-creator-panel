@@ -27,7 +27,7 @@ function App() {
   const [loadingState, setLoadingState] = useState<LoadingState | null>(null);
   const [result, setResult] = useState<{
     success: boolean;
-    message: string;
+    message: string[];
   } | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [oracles, setOracles] = useState<Oracle[]>([]);
@@ -68,6 +68,7 @@ function App() {
           "There was a conflict in your authentication state! Please login again first."
         );
       }
+
       if (formData.image) {
         setLoadingState({
           step: "uploading",
@@ -85,7 +86,9 @@ function App() {
         image: imageFilename || undefined,
       };
       delete marketData.image;
-
+      if (!marketData.resolveAt) {
+        throw new Error("Resolving date (deadline) is required");
+      }
       await createMarket(
         baseUrl,
         {
@@ -106,7 +109,7 @@ function App() {
       });
       setResult({
         success: true,
-        message: "Your prediction market has been created successfully!",
+        message: ["Your prediction market has been created successfully!"],
       });
 
       setTimeout(() => {
@@ -118,16 +121,39 @@ function App() {
         logout();
         setResult({
           success: false,
-          message:
+          message: [
             "Your login session seems to be invalid or expired. Please login again...",
+          ],
+        });
+      } else if (
+        error instanceof AxiosError &&
+        error.status === 400 &&
+        error.response?.data?.message?.toLowerCase() === "validation exception"
+      ) {
+        const message = ["Invalid Input! "];
+        const fieldProblems = Object.entries(
+          error.response?.data?.fields || {}
+        );
+        if (fieldProblems.length) {
+          message.push(
+            ...fieldProblems.map(([field, issues]) => {
+              const issue = issues instanceof Array ? issues[0] : issues;
+              return `\n* ${field}: ${Object.values(issue ?? {})?.[0]}`;
+            })
+          );
+        }
+        setResult({
+          success: false,
+          message,
         });
       } else {
         setResult({
           success: false,
-          message:
+          message: [
             error instanceof Error
               ? error.message
               : "An unexpected error occurred",
+          ],
         });
       }
 
@@ -199,20 +225,22 @@ function App() {
                 : "bg-red-50 border-2 border-red-200"
             } animate-fadeIn`}
           >
-            <div className="flex items-center gap-3">
-              {result.success ? (
-                <CheckCircle2 className="text-green-600 w-6 h-6" />
-              ) : (
-                <AlertCircle className="text-red-600 w-6 h-6" />
-              )}
-              <p
-                className={`font-medium ${
-                  result.success ? "text-green-800" : "text-red-800"
-                }`}
-              >
-                {result.message}
-              </p>
-            </div>
+            {result.message?.map((msg) => (
+              <div className="flex items-center gap-3">
+                {result.success ? (
+                  <CheckCircle2 className="text-green-600 w-6 h-6" />
+                ) : (
+                  <AlertCircle className="text-red-600 w-6 h-6" />
+                )}
+                <p
+                  className={`font-medium ${
+                    result.success ? "text-green-800" : "text-red-800"
+                  }`}
+                >
+                  {msg}
+                </p>
+              </div>
+            ))}
           </div>
         )}
       </div>

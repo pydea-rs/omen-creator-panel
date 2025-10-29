@@ -16,10 +16,10 @@ interface MarketFormProps {
 function MarketForm({ onSubmit, disabled, categories, oracles, setShowLoginModal }: MarketFormProps) {
 
   const [formData, setFormData] = useState<MarketFormData>({
-    title: '',
+    question: '',
     description: '',
     category: 3,
-    endDate: '',
+    resolveAt: new Date(),
     outcomes: ['', ''],
     reference: '',
     initialLiquidity: undefined,
@@ -114,8 +114,8 @@ function MarketForm({ onSubmit, disabled, categories, oracles, setShowLoginModal
         <input
           type="text"
           required
-          value={formData.title}
-          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+          value={formData.question}
+          onChange={(e) => setFormData({ ...formData, question: e.target.value })}
           className="w-full px-4 py-3 rounded-lg border-2 border-slate-200 focus:border-blue-500 focus:outline-none transition-colors"
           placeholder="Will Bitcoin reach $100k by end of 2025?"
           disabled={disabled}
@@ -158,8 +158,8 @@ function MarketForm({ onSubmit, disabled, categories, oracles, setShowLoginModal
           <input
             type="datetime-local"
             required
-            value={formData.endDate}
-            onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+            value={formData.resolveAt?.toISOString().slice(0, 16)}
+            onChange={(e) => setFormData({ ...formData, resolveAt: new Date(e.target.value) })}
             className="w-full px-4 py-3 rounded-lg border-2 border-slate-200 focus:border-blue-500 focus:outline-none transition-colors"
             disabled={disabled}
           />
@@ -174,8 +174,8 @@ function MarketForm({ onSubmit, disabled, categories, oracles, setShowLoginModal
           </label>
           <input
             type="datetime-local"
-            value={formData.startAt || ''}
-            onChange={(e) => setFormData({ ...formData, startAt: e.target.value })}
+            value={formData.startAt?.toISOString().slice(0, 16)}
+            onChange={(e) => setFormData({ ...formData, startAt: new Date(e.target.value) })}
             className="w-full px-4 py-3 rounded-lg border-2 border-slate-200 focus:border-blue-500 focus:outline-none transition-colors"
             disabled={disabled}
           />

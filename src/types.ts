@@ -11,17 +11,17 @@ export interface Oracle {
 }
 
 export interface MarketFormData {
-  title: string;
+  question: string;
   description: string;
   category?: number;
-  endDate: string;
+  resolveAt: Date;
   outcomes: string[];
   image?: File;
   reference?: string;
   initialLiquidity?: number;
   oracle?: number;
   fee?: number;
-  startAt?: string;
+  startAt?: Date;
 }
 
 export interface LoadingState {

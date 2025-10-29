@@ -7,17 +7,17 @@ interface MarketOutcome {
   description?: string;
 }
 interface CreateMarketPayload {
-  title: string;
+  question: string;
   description: string;
   categoryId?: number;
-  endDate: string;
+  resolveAt: Date;
   outcomes: MarketOutcome[];
   image?: string;
   reference?: string;
   initialLiquidity?: number;
   oracleId?: number;
   fee?: number;
-  startAt?: string;
+  startAt?: Date;
 }
 
 interface DoLoginPayload {
@@ -25,9 +25,15 @@ interface DoLoginPayload {
   password: string;
 }
 
-const handleAxiosError = (error: unknown, defaultMessage: string): never => {
+const handleAxiosError = (
+  error: unknown,
+  defaultMessage: string,
+  throwExactError: boolean = false
+): never => {
   if (axios.isAxiosError(error)) {
-    console.log(error.response)
+    if (throwExactError) {
+      throw error;
+    }
     const message =
       error.response?.data?.message || error.message || defaultMessage;
     throw new Error(message);
@@ -57,7 +63,7 @@ export async function uploadImage(
 
     return res.data.filename;
   } catch (error) {
-    handleAxiosError(error, "Failed to upload image");
+    handleAxiosError(error, "Failed to upload image", true);
   }
   return null;
 }
@@ -103,7 +109,7 @@ export async function createMarket(
       },
     });
   } catch (error) {
-    handleAxiosError(error, "Failed to create market");
+    handleAxiosError(error, "Failed to create market", true);
   }
 }
 
