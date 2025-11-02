@@ -17,7 +17,7 @@ export function useAuth(baseURL: string) {
   useEffect(() => {
     const token = localStorage.getItem(baseURL);
     setAuthState({
-      isAuthenticated: !!token,
+      isAuthenticated: Boolean(token),
       token,
       loading: false,
     });

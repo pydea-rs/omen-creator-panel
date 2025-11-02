@@ -134,5 +134,5 @@ export async function doLogin(
 export const API_OPTIONS = [
   { value: 'https://staging.omenium.app/api', label: 'New Arena - Staging' },
   { value: 'https://staging.omenium.com/api', label: 'Old Arena - Dev' },
-  { value: 'https://api.omenium.com/api', label: 'New Arena - Production' },
+  { value: 'https://api.omenium.app/api', label: 'New Arena - Production' },
 ];

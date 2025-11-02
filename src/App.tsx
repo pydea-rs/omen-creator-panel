@@ -84,7 +84,7 @@ function App() {
         ...formData,
         image: imageFilename || undefined,
       };
-      if (!category || !categories?.find((item) => item.id === category)) {
+      if (!category) {
         throw new Error("Please select a valid category!");
       }
       delete marketData.image;
