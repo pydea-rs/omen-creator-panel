@@ -15,7 +15,6 @@ export function useAuth(baseURL: string) {
   });
 
   useEffect(() => {
-    // Check for existing token in localStorage
     const token = localStorage.getItem(baseURL);
     setAuthState({
       isAuthenticated: !!token,

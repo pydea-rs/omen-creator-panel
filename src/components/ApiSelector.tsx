@@ -1,14 +1,10 @@
 import { Server } from 'lucide-react';
+import { API_OPTIONS } from '../services/api';
 
 interface ApiSelectorProps {
   baseUrl: string;
   onChange: (url: string) => void;
 }
-
-const API_OPTIONS = [
-  { value: 'https://staging.omenium.app/api', label: 'New Arena - Staging' },
-  { value: 'https://staging.omenium.com/api', label: 'Old Arena - Dev' },
-];
 
 function ApiSelector({ baseUrl, onChange }: ApiSelectorProps) {
   return (
@@ -17,7 +13,7 @@ function ApiSelector({ baseUrl, onChange }: ApiSelectorProps) {
         <Server className="w-4 h-4" />
         Target Stage
       </label>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         {API_OPTIONS.map((option) => (
           <button
             key={option.value}

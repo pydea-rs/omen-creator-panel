@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect } from 'react';
-import { ChevronRight, Check } from 'lucide-react';
-import type { Category } from '../types';
+import { useState, useRef, useEffect } from "react";
+import { ChevronRight, Check } from "lucide-react";
+import type { Category } from "../types";
 
 interface CategorySelectorProps {
   categories: Category[];
@@ -16,14 +16,21 @@ interface CategoryMenuProps {
   level: number;
 }
 
-function CategoryMenu({ categories, onSelect, selectedId, level }: CategoryMenuProps) {
+function CategoryMenu({
+  categories,
+  onSelect,
+  selectedId,
+  level,
+}: CategoryMenuProps) {
   const [hoveredCategory, setHoveredCategory] = useState<Category | null>(null);
-  const [submenuPosition, setSubmenuPosition] = useState<{ top: number; left: number } | null>(null);
+  const [submenuPosition, setSubmenuPosition] = useState<{
+    top: number;
+    left: number;
+  } | null>(null);
   const itemRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleMouseEnter = (category: Category, id: number) => {
-    // Clear any existing timeout
     if (hoverTimeoutRef.current) {
       clearTimeout(hoverTimeoutRef.current);
       hoverTimeoutRef.current = null;
@@ -35,8 +42,8 @@ function CategoryMenu({ categories, onSelect, selectedId, level }: CategoryMenuP
       if (element) {
         const rect = element.getBoundingClientRect();
         setSubmenuPosition({
-          top: rect.top - 8, // Slight offset to align better
-          left: rect.right + 4 // Small gap between menus
+          top: rect.top - 8,
+          left: rect.right + 4,
         });
       }
     } else {
@@ -46,7 +53,6 @@ function CategoryMenu({ categories, onSelect, selectedId, level }: CategoryMenuP
   };
 
   const handleMouseLeave = () => {
-    // Add a small delay before hiding the submenu
     hoverTimeoutRef.current = setTimeout(() => {
       setHoveredCategory(null);
       setSubmenuPosition(null);
@@ -54,7 +60,6 @@ function CategoryMenu({ categories, onSelect, selectedId, level }: CategoryMenuP
   };
 
   const handleSubmenuMouseEnter = () => {
-    // Clear timeout when entering submenu
     if (hoverTimeoutRef.current) {
       clearTimeout(hoverTimeoutRef.current);
       hoverTimeoutRef.current = null;
@@ -69,7 +74,9 @@ function CategoryMenu({ categories, onSelect, selectedId, level }: CategoryMenuP
   return (
     <>
       <div
-        className={`bg-white rounded-lg shadow-lg border-2 border-slate-200 py-2 min-w-64 max-h-96 overflow-y-auto ${level === 0 ? 'relative' : ''}`}
+        className={`bg-white rounded-lg shadow-lg border-2 border-slate-200 py-2 min-w-64 max-h-96 overflow-y-auto ${
+          level === 0 ? "relative" : ""
+        }`}
         onMouseLeave={handleMouseLeave}
       >
         {categories.map((category) => (
@@ -79,12 +86,18 @@ function CategoryMenu({ categories, onSelect, selectedId, level }: CategoryMenuP
             type="button"
             onMouseEnter={() => handleMouseEnter(category, category.id)}
             onClick={() => {
-              if (!category.subCategories || category.subCategories.length === 0) {
+              if (
+                !category.subCategories ||
+                category.subCategories.length === 0
+              ) {
                 onSelect(category);
               }
             }}
-            className={`w-full px-4 py-2.5 text-left flex items-center justify-between hover:bg-blue-50 transition-colors ${selectedId === category.id ? 'bg-blue-100 text-blue-700' : 'text-slate-700'
-              }`}
+            className={`w-full px-4 py-2.5 text-left flex items-center justify-between hover:bg-blue-50 transition-colors ${
+              selectedId === category.id
+                ? "bg-blue-100 text-blue-700"
+                : "text-slate-700"
+            }`}
           >
             <span className="flex items-center gap-2">
               {selectedId === category.id && <Check className="w-4 h-4" />}
@@ -96,32 +109,40 @@ function CategoryMenu({ categories, onSelect, selectedId, level }: CategoryMenuP
           </button>
         ))}
       </div>
-      {hoveredCategory && hoveredCategory.subCategories && hoveredCategory.subCategories.length > 0 && submenuPosition && (
-        <div
-          className="fixed z-[60]"
-          style={{
-            top: submenuPosition.top,
-            left: submenuPosition.left,
-            pointerEvents: 'auto'
-          }}
-          onMouseEnter={handleSubmenuMouseEnter}
-          onMouseLeave={handleSubmenuMouseLeave}
-        >
-          <CategoryMenu
-            categories={hoveredCategory.subCategories}
-            onSelect={onSelect}
-            selectedId={selectedId}
-            level={level + 1}
-          />
-        </div>
-      )}
+      {hoveredCategory &&
+        hoveredCategory.subCategories &&
+        hoveredCategory.subCategories.length > 0 &&
+        submenuPosition && (
+          <div
+            className="fixed z-[60]"
+            style={{
+              top: submenuPosition.top,
+              left: submenuPosition.left,
+              pointerEvents: "auto",
+            }}
+            onMouseEnter={handleSubmenuMouseEnter}
+            onMouseLeave={handleSubmenuMouseLeave}
+          >
+            <CategoryMenu
+              categories={hoveredCategory.subCategories}
+              onSelect={onSelect}
+              selectedId={selectedId}
+              level={level + 1}
+            />
+          </div>
+        )}
     </>
   );
 }
 
-function CategorySelector({ categories, value, onChange, disabled }: CategorySelectorProps) {
+function CategorySelector({
+  categories,
+  value,
+  onChange,
+  disabled,
+}: CategorySelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedName, setSelectedName] = useState('');
+  const [selectedName, setSelectedName] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -133,7 +154,7 @@ function CategorySelector({ categories, value, onChange, disabled }: CategorySel
           if (found) return found;
         }
       }
-      return '';
+      return "";
     };
 
     if (value) {
@@ -143,17 +164,20 @@ function CategorySelector({ categories, value, onChange, disabled }: CategorySel
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
 
     if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen]);
 
@@ -171,7 +195,7 @@ function CategorySelector({ categories, value, onChange, disabled }: CategorySel
         disabled={disabled}
         className="w-full px-4 py-3 rounded-lg border-2 border-slate-200 focus:border-blue-500 focus:outline-none transition-colors text-left bg-white disabled:bg-slate-50 disabled:cursor-not-allowed"
       >
-        {selectedName || 'Select a category...'}
+        {selectedName || "Select a category..."}
       </button>
       {isOpen && (
         <div className="absolute top-full left-0 mt-2 z-50">

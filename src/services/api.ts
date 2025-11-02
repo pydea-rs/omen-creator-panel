@@ -9,7 +9,7 @@ interface MarketOutcome {
 interface CreateMarketPayload {
   question: string;
   description?: string;
-  categoryId?: number;
+  categoryId: number;
   resolveAt: Date;
   outcomes: MarketOutcome[];
   image?: string;
@@ -129,3 +129,10 @@ export async function doLogin(
   }
   return null;
 }
+
+
+export const API_OPTIONS = [
+  { value: 'https://staging.omenium.app/api', label: 'New Arena - Staging' },
+  { value: 'https://staging.omenium.com/api', label: 'Old Arena - Dev' },
+  { value: 'https://api.omenium.com/api', label: 'New Arena - Production' },
+];

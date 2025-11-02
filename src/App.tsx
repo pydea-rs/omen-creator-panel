@@ -9,6 +9,7 @@ import {
   createMarket,
   fetchCategories,
   fetchOracles,
+  API_OPTIONS,
 } from "./services/api";
 import type { MarketFormData, LoadingState, Category, Oracle } from "./types";
 import LoginModal from "./components/LoginModal";
@@ -16,7 +17,7 @@ import { useAuth } from "./hooks/useAuth";
 import { AxiosError } from "axios";
 
 function App() {
-  const [baseUrl, setBaseUrl] = useState("https://staging.omenium.app/api");
+  const [baseUrl, setBaseUrl] = useState(API_OPTIONS[0].value);
   const {
     login,
     loading: loginLoading,
@@ -33,8 +34,6 @@ function App() {
   const [oracles, setOracles] = useState<Oracle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showLoginModal, setShowLoginModal] = useState(false);
-
-  // Don't auto-show login modal - let user trigger it manually
 
   useEffect(() => {
     const loadData = async () => {
@@ -85,6 +84,9 @@ function App() {
         ...formData,
         image: imageFilename || undefined,
       };
+      if (!category || !categories?.find((item) => item.id === category)) {
+        throw new Error("Please select a valid category!");
+      }
       delete marketData.image;
       if (!marketData.resolveAt) {
         throw new Error("Resolving date (deadline) is required");

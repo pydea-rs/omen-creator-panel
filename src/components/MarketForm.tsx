@@ -33,7 +33,7 @@ function MarketForm({
   const [formData, setFormData] = useState<MarketFormData>({
     question: "",
     description: "",
-    category: 3,
+    category: undefined,
     resolveAt: new Date(),
     outcomes: ["", ""],
     reference: "",
@@ -124,7 +124,7 @@ function MarketForm({
       setFormData({
         question: "",
         description: "",
-        category: 3,
+        category: undefined,
         resolveAt: new Date(),
         outcomes: ["", ""],
         reference: "",
@@ -180,7 +180,7 @@ function MarketForm({
           </label>
           <CategorySelector
             categories={categories}
-            value={formData.category || 3}
+            value={formData.category || 0}
             onChange={(slug) => setFormData({ ...formData, category: slug })}
             disabled={disabled}
           />
