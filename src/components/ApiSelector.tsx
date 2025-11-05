@@ -13,10 +13,10 @@ function ApiSelector({ baseUrl, onChange }: ApiSelectorProps) {
         <Server className="w-4 h-4" />
         Target Stage
       </label>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
         {API_OPTIONS.map((option) => (
           <button
-            key={option.value}
+            key={option.root}
             onClick={() => onChange(option.value)}
             className={`p-4 rounded-xl border-2 transition-all duration-200 text-left ${
               baseUrl === option.value
@@ -26,7 +26,7 @@ function ApiSelector({ baseUrl, onChange }: ApiSelectorProps) {
           >
             <div className="font-medium text-slate-800">{option.label}</div>
             <div className="text-xs text-slate-500 mt-1 font-mono truncate">
-              {option.value}
+              {option.root}
             </div>
           </button>
         ))}
